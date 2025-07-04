@@ -1,0 +1,82 @@
+{
+  "Paradip Port": {
+    "currency": "INR",
+    "wharfageRatesPerMT": {
+      "Chrome Ore": 51,
+      "Coal": 43,
+      "Iron Ore (IOHP)": 23.45,
+      "Fertilizers": 27.20
+    },
+    "containerWharfagePerContainer": {
+      "20ft": 68,
+      "40ft": 136
+    },
+    "reeferElectricityPer4Hours": {
+      "20ft": 102
+    },
+    "demurragePerMTPerDay": {
+      "ImportWeek1": 3.40,
+      "ImportWeek3": 17,
+      "ExportWeek1": 2.05,
+      "ExportWeek3": 10.20
+    },
+    "notes": "Coastal vessels are charged 60% of these rates."
+  },
+
+  "JNPT": {
+    "currency": "INR",
+    "portDuesPerGRT": {
+      "BulkCarrier": 4.9257,
+      "ContainerVessel": 3.7890,
+      "CarCarrier": 2.4493
+    },
+    "pilotagePerGRT": {
+      "UpTo30000": 8.4441,
+      "30001to60000": {
+        "fixed": 253323,
+        "additionalPerGRT": 6.7526
+      },
+      "Above60000": {
+        "fixed": 455901,
+        "additionalPerGRT": 5.9136
+      }
+    },
+    "berthHirePerGRTPerHour": 0.1218,
+    "freshWaterPerMT": 89.3671,
+    "garbageCollectionPerVisit": 676.6136,
+    "containerHandlingPerTEU": {
+  "20ftLoaded": 2155.38,
+  "20ftEmpty": 1740.88,
+  "40ftLoaded": 3233.07,
+  "40ftEmpty": 2611.32
+},
+
+    "shiftingChargesPerGRT": {
+      "SameTerminalUpTo30000": 1.6528,
+      "SameTerminal30001to60000": {
+        "fixed": 49584,
+        "additionalPerGRT": 1.3090
+      },
+      "SameTerminalAbove60000": {
+        "fixed": 88854,
+        "additionalPerGRT": 1.1504
+      },
+      "OtherTerminalUpTo30000": 4.22,
+      "OtherTerminal30001to60000": {
+        "fixed": 126600,
+        "additionalPerGRT": 3.376
+      },
+      "OtherTerminalAbove60000": {
+        "fixed": 227880,
+        "additionalPerGRT": 2.95
+      }
+    },
+    "coldMoveMultiplier": {
+      "bothWays": 2.0,
+      "oneWay": 1.5
+    },
+    "pilotageMinimumPerVisit": 6712.73,
+    "berthHireAnchoragePerGRTPerHour": 0.0541,
+    "notes": "Coastal vessels are charged 60% of normal charges, except specific categories."
+  }
+}
