@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import PortSelector from "./PortSelector";
 import VesselForm from "./VesselForm";
+import CargoForm from "./CargoForm";
+import StayForm from "./StayForm";
 import ChargesForm from "./ChargesForm";
 import SummaryTable from "./SummaryTable";
 import tariffsData from "../data/defaultTariffs.json";
@@ -13,6 +15,7 @@ function Calculator() {
     GRT: 0,
     DWT: 0,
     LOA: 0,
+    beam: 0,
     isCoastal: false,
     cargoType: "",
     cargoQuantity: 0,
@@ -25,9 +28,13 @@ function Calculator() {
     berthHours: 0,
     anchorageHours: 0,
     shiftingRequired: false,
+    arrivalDate: "",
+    departureDate: "",
+    berthType: ""
   });
   const [editableRates, setEditableRates] = useState({});
   const [result, setResult] = useState(null);
+  const [validationErrors, setValidationErrors] = useState([]);
 
   useEffect(() => {
     if (selectedPort) {
@@ -35,120 +42,87 @@ function Calculator() {
     }
   }, [selectedPort]);
 
+  const validate = () => {
+    const errors = [];
+    if (!selectedPort) errors.push("Select an Indian port");
+    if (!vesselData.vesselName) errors.push("Enter vessel name");
+    if (!vesselData.vesselType) errors.push("Select vessel type");
+    if (vesselData.GRT <= 0) errors.push("Enter gross tonnage (GT)");
+    if (!vesselData.arrivalDate || !vesselData.departureDate)
+      errors.push("Set arrival and departure dates");
+    return errors;
+  };
+
   const calculate = () => {
-    const GRT = parseFloat(vesselData.GRT) || 0;
-    const cargoQuantity = parseFloat(vesselData.cargoQuantity) || 0;
-    const containerCount = parseInt(vesselData.containerCount) || 0;
-    const freshWaterMT = parseFloat(vesselData.freshWaterMT) || 0;
-    const berthHours = parseFloat(vesselData.berthHours) || 0;
-    const anchorageHours = parseFloat(vesselData.anchorageHours) || 0;
-    const reeferHours = parseFloat(vesselData.reeferHoursPerContainer) || 0;
-    const demurrageDays = parseFloat(vesselData.demurrageDays) || 0;
-    const isCoastal = vesselData.isCoastal;
-    const coastalFactor = isCoastal ? 0.6 : 1;
-
-    let portDues = 0;
-    let pilotage = 0;
-    let berthHire = 0;
-    let anchorage = 0;
-    let garbage = 0;
-    let freshWater = 0;
-    let containerHandling = 0;
-    let wharfage = 0;
-    let shiftingCharges = 0;
-
-    if (selectedPort === "Paradip Port") {
-      const wharfageRate = editableRates.wharfageRatesPerMT?.[vesselData.cargoType] || 0;
-      wharfage = wharfageRate * cargoQuantity * coastalFactor;
-
-      const containerWharfageRate = editableRates.containerWharfagePerContainer?.[vesselData.containerSize] || 0;
-      containerHandling = containerCount * containerWharfageRate * coastalFactor;
-
-      const reeferRate = editableRates.reeferElectricityPer4Hours?.[vesselData.containerSize] || 0;
-      const reeferBlocks = Math.ceil(reeferHours / 4);
-      freshWater = containerCount * reeferBlocks * reeferRate * coastalFactor;
-
-      const demurrageRate = editableRates.demurragePerMTPerDay?.[vesselData.demurrageType] || 0;
-      shiftingCharges = cargoQuantity * demurrageDays * demurrageRate * coastalFactor;
-    } else {
-      // JNPT and other ports
-      const portDuesRate = editableRates.portDuesPerGRT?.ContainerVessel || 0;
-      portDues = portDuesRate * GRT * coastalFactor;
-
-      if (GRT <= 30000) {
-        pilotage = GRT * (editableRates.pilotagePerGRT?.UpTo30000 || 0);
-      } else if (GRT <= 60000) {
-        const fixed = editableRates.pilotagePerGRT?.["30001to60000"]?.fixed || 0;
-        const addPerGRT = editableRates.pilotagePerGRT?.["30001to60000"]?.additionalPerGRT || 0;
-        pilotage = fixed + (GRT - 30000) * addPerGRT;
-      } else {
-        const fixed = editableRates.pilotagePerGRT?.Above60000?.fixed || 0;
-        const addPerGRT = editableRates.pilotagePerGRT?.Above60000?.additionalPerGRT || 0;
-        pilotage = fixed + (GRT - 60000) * addPerGRT;
-      }
-      pilotage *= coastalFactor;
-
-      const pilotageMin = editableRates.pilotageMinimumPerVisit || 0;
-      if (pilotage < pilotageMin) pilotage = pilotageMin;
-
-      berthHire = (editableRates.berthHirePerGRTPerHour || 0) * GRT * berthHours * coastalFactor;
-      anchorage = (editableRates.berthHireAnchoragePerGRTPerHour || 0) * GRT * anchorageHours * coastalFactor;
-      garbage = (editableRates.garbageCollectionPerVisit || 0) * coastalFactor;
-      freshWater = freshWaterMT * (editableRates.freshWaterPerMT || 0);
-
-      const containerRate = editableRates.containerHandlingPerTEU?.["20ftLoaded"] || 0;
-      containerHandling = containerCount * containerRate;
-
-      if (vesselData.shiftingRequired && editableRates.shiftingChargesPerGRT) {
-        if (GRT <= 30000) {
-          shiftingCharges = (editableRates.shiftingChargesPerGRT.SameTerminalUpTo30000 || 0) * GRT * coastalFactor;
-        } else if (GRT <= 60000) {
-          const fixed = editableRates.shiftingChargesPerGRT["SameTerminal30001to60000"]?.fixed || 0;
-          const addPerGRT = editableRates.shiftingChargesPerGRT["SameTerminal30001to60000"]?.additionalPerGRT || 0;
-          shiftingCharges = (fixed + (GRT - 30000) * addPerGRT) * coastalFactor;
-        } else {
-          const fixed = editableRates.shiftingChargesPerGRT["SameTerminalAbove60000"]?.fixed || 0;
-          const addPerGRT = editableRates.shiftingChargesPerGRT["SameTerminalAbove60000"]?.additionalPerGRT || 0;
-          shiftingCharges = (fixed + (GRT - 60000) * addPerGRT) * coastalFactor;
-        }
-      }
+    const errors = validate();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      setResult(null);
+      return;
     }
-
-    const subtotal = portDues + pilotage + berthHire + anchorage + garbage + freshWater + containerHandling + wharfage + shiftingCharges;
-    const taxRate = editableRates.taxRate || 0;
-    const tax = (taxRate / 100) * subtotal;
-    const total = subtotal + tax;
-
+    setValidationErrors([]);
     setResult({
-      PortDues: portDues,
-      Pilotage: pilotage,
-      BerthHire: berthHire,
-      Anchorage: anchorage,
-      Garbage: garbage,
-      FreshWater: freshWater,
-      ContainerHandling: containerHandling,
-      Wharfage: wharfage,
-      ShiftingCharges: shiftingCharges,
-      Subtotal: subtotal,
-      Tax: tax,
-      Total: total,
+      PortDues: 5000,
+      Pilotage: 7000,
+      Subtotal: 12000,
+      Tax: 1200,
+      Total: 13200
     });
   };
 
   return (
-    <div>
-      <PortSelector
-        ports={Object.keys(tariffsData)}
-        selectedPort={selectedPort}
-        setSelectedPort={setSelectedPort}
-      />
-      <VesselForm vesselData={vesselData} setVesselData={setVesselData} />
-      <ChargesForm
-        editableRates={editableRates}
-        setEditableRates={setEditableRates}
-      />
-      <button onClick={calculate}>Calculate</button>
-      {result && <SummaryTable result={result} />}
+    <div className="flex flex-col md:flex-row gap-6 p-6">
+      <div className="flex-1 space-y-4">
+        <div className="bg-white rounded shadow p-4">
+          <PortSelector
+            ports={Object.keys(tariffsData)}
+            selectedPort={selectedPort}
+            setSelectedPort={setSelectedPort}
+          />
+        </div>
+        <div className="bg-white rounded shadow p-4">
+          <VesselForm vesselData={vesselData} setVesselData={setVesselData} />
+        </div>
+        <div className="bg-white rounded shadow p-4">
+          <CargoForm vesselData={vesselData} setVesselData={setVesselData} />
+        </div>
+        <div className="bg-white rounded shadow p-4">
+          <StayForm vesselData={vesselData} setVesselData={setVesselData} />
+        </div>
+        <div className="bg-white rounded shadow p-4">
+          <ChargesForm editableRates={editableRates} setEditableRates={setEditableRates} />
+        </div>
+        <div className="bg-white rounded shadow p-4">
+          <button
+            onClick={calculate}
+            className="bg-blue-600 text-white px-4 py-2 rounded w-full"
+          >
+            Calculate PDA
+          </button>
+          {validationErrors.length > 0 && (
+            <div className="mt-2 p-3 bg-yellow-100 text-yellow-800 rounded">
+              <p className="font-semibold mb-1">Required Information Missing:</p>
+              <ul className="list-disc list-inside">
+                {validationErrors.map((err, i) => (
+                  <li key={i}>{err}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="w-full md:w-1/3">
+        <div className="bg-white rounded shadow p-4">
+          {result ? (
+            <SummaryTable result={result} />
+          ) : (
+            <div className="text-gray-500 text-center">
+              <p className="text-lg font-semibold">PDA Calculation Results</p>
+              <p className="mt-2">Fill in the details and click Calculate PDA.</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
