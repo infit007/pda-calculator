@@ -3,7 +3,6 @@ import PortSelector from "./PortSelector";
 import VesselForm from "./VesselForm";
 import CargoForm from "./CargoForm";
 import StayForm from "./StayForm";
-import ChargesForm from "./ChargesForm";
 import SummaryTable from "./SummaryTable";
 import tariffsData from "../data/defaultTariffs.json";
 
@@ -30,7 +29,7 @@ function Calculator() {
     shiftingRequired: false,
     arrivalDate: "",
     departureDate: "",
-    berthType: ""
+    berthType: "",
   });
   const [editableRates, setEditableRates] = useState({});
   const [result, setResult] = useState(null);
@@ -66,7 +65,7 @@ function Calculator() {
       Pilotage: 7000,
       Subtotal: 12000,
       Tax: 1200,
-      Total: 13200
+      Total: 13200,
     });
   };
 
@@ -90,9 +89,6 @@ function Calculator() {
           <StayForm vesselData={vesselData} setVesselData={setVesselData} />
         </div>
         <div className="bg-white rounded shadow p-4">
-          <ChargesForm editableRates={editableRates} setEditableRates={setEditableRates} />
-        </div>
-        <div className="bg-white rounded shadow p-4">
           <button
             onClick={calculate}
             className="bg-blue-600 text-white px-4 py-2 rounded w-full"
@@ -101,7 +97,9 @@ function Calculator() {
           </button>
           {validationErrors.length > 0 && (
             <div className="mt-2 p-3 bg-yellow-100 text-yellow-800 rounded">
-              <p className="font-semibold mb-1">Required Information Missing:</p>
+              <p className="font-semibold mb-1">
+                Required Information Missing:
+              </p>
               <ul className="list-disc list-inside">
                 {validationErrors.map((err, i) => (
                   <li key={i}>{err}</li>
@@ -118,7 +116,9 @@ function Calculator() {
           ) : (
             <div className="text-gray-500 text-center">
               <p className="text-lg font-semibold">PDA Calculation Results</p>
-              <p className="mt-2">Fill in the details and click Calculate PDA.</p>
+              <p className="mt-2">
+                Fill in the details and click Calculate PDA.
+              </p>
             </div>
           )}
         </div>

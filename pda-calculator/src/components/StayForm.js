@@ -40,30 +40,30 @@ export default function StayForm({ vesselData, setVesselData }) {
         </select>
       </div>
       <div>
-        <label className="block font-semibold">Anchorage Required</label>
-        <div className="flex gap-4 mt-1">
-          <label>
+        <label className="block font-semibold mb-1">Anchorage Required</label>
+        <div className="flex items-center gap-8 p-2 border rounded">
+          <div className="flex flex-col items-center">
+            <label className="text-sm font-medium mb-1 cursor-pointer">Yes</label>
             <input
               type="radio"
               name="anchorageRequired"
+              value="Yes"
               checked={vesselData.anchorageRequired === "Yes"}
-              onChange={() =>
-                setVesselData({ ...vesselData, anchorageRequired: "Yes" })
-              }
+              onChange={handleChange}
+              className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
             />
-            Yes
-          </label>
-          <label>
+          </div>
+          <div className="flex flex-col items-center">
+            <label className="text-sm font-medium mb-1 cursor-pointer">No</label>
             <input
               type="radio"
               name="anchorageRequired"
+              value="No"
               checked={vesselData.anchorageRequired === "No"}
-              onChange={() =>
-                setVesselData({ ...vesselData, anchorageRequired: "No" })
-              }
+              onChange={handleChange}
+              className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
             />
-            No
-          </label>
+          </div>
         </div>
       </div>
     </div>
